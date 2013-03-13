@@ -1,0 +1,20 @@
+
+{namespace aloy.ui.soy.Tagger}
+
+/**
+ * @param eId      |
+ * @param tagText  |
+ * @param metaKeys | Array
+ * @param meta     | Object
+ */
+{template .getHtml autoescape="false"}
+<div id="{$eId}" class='goog-inline-block {css aloy.ui.TaggerRenderer.CSS_CLASS}'
+    {foreach $key in $metaKeys}
+        data-{$key}="{$meta[$key]}"
+    {/foreach}
+>
+    <span class="tagText">{$tagText}</span>
+
+    /*Append here a goog.ui.Button rendered using FlatButtonRenderer*/
+</div>
+{/template}

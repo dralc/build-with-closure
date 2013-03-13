@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Paginator demo</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <link href="http://yui.yahooapis.com/3.3.0/build/cssreset/reset-min.css" rel="stylesheet"/>
+        <link href="../../../../closure-library/closure/goog/css/common.css" rel="stylesheet"/>
+        <link href="../ui/paginator/paginator.css" rel="stylesheet"/>
+        
+        <script src="../../../../closure-library/closure/goog/base.js"></script>
+        <script src="../../devDeps.js"></script>
+        <script>
+            goog.require('aloy.ui.Paginator');
+            goog.require('goog.events');
+            goog.require('goog.events.KeyCodes');
+        </script>
+    </head>
+    <body>
+
+        Basic Paginator, initial totalItems to paginate == 150:
+        <div id="myPaginator1"></div>
+
+        <script>
+            var p = new aloy.ui.Paginator(goog.dom.getElement('myPaginator1'), 150);
+            p.render();
+        </script>
+
+        <hr/>
+
+        Configure Paginator with a stats message, prev & next buttons
+        <div id="myPaginator3"></div>
+
+        <script>
+            var p3 = new aloy.ui.Paginator(goog.dom.getElement('myPaginator3'), 110);
+            p3.render(true, true, true);
+        </script>
+
+        <hr/>
+
+        Dynamically reset paginator
+        <br/>
+        totalItems :<input id="total2" type="text"/>
+        <br/>
+        itemsPerPage :<input id="itemsPerPage2" type="text"/>
+        <br/>
+        maxPagesInSet :<input id="maxPagesInSet2" type="text"/>
+        <button id="runBut">re-generate</button>
+
+        <div id="myPaginator2"></div>
+
+        <script>
+            //--- Allow dynamic setting of maxPg, re-render pagination on 'Enter' key -----
+            var p2 = new aloy.ui.Paginator(goog.dom.getElement('myPaginator2'));
+
+            var input = goog.dom.getElement('total2');
+            var input2 = goog.dom.getElement('itemsPerPage2');
+            var input3 = goog.dom.getElement('maxPagesInSet2');
+
+    goog.events.listen(goog.dom.getElement('runBut'), goog.events.EventType.CLICK, function(e) {
+
+                p2.reset(input.value, input2.value, input3.value);
+                p2.render(true, true, true);
+            });
+
+            // Optionally register to page_clicked event
+            goog.events.listen(p, 'page_clicked', function(e) {
+                console.info('event: page '+ e.page+ ' was clicked');
+            });
+
+        </script>
+        
+    </body>
+</html>

@@ -1,0 +1,60 @@
+.aloy-ui-tagger {
+    font-size: 13px;
+    padding: 1px 1px 1px 5px;
+    background-color: #ddd;
+    border-radius: 4px;
+    border: #B8B8B8 solid 1px;
+    box-shadow: 1px 1px 2px #CCC;
+}
+
+.aloy-ui-tagger .tagText {
+    font-weight:bold;
+}
+
+.goog-flat-button {
+  position: relative;
+  margin-left: 3px;
+  padding: 0 3px;
+  color: #1D1D1D;
+  background-color: #DDD;
+  cursor: pointer;
+  outline: none;
+  -moz-outline: none;
+  border-radius: 4px;
+}
+
+/* State: disabled. */
+.goog-flat-button-disabled {
+  border-color: #888;
+  color: #888;
+  background-color: #ccc;
+  cursor: default;
+}
+
+/* State: hover. */
+.goog-flat-button-hover {
+  color: #1D1D1D;
+  background-color: #F4F4F4;
+}
+
+/* State: active, selected, checked. */
+.goog-flat-button-active,
+.goog-flat-button-selected,
+.goog-flat-button-checked {
+  background-color: #E9E9E9;
+}
+
+/* State: focused. */
+.goog-flat-button-focused {
+  border-color: #5b4169;
+}
+
+/* Pill (collapsed border) styles. */
+.goog-flat-button-collapse-right {
+  margin-right: 0;
+}
+
+.goog-flat-button-collapse-left {
+  margin-left: 0;
+  border-left: none;
+}

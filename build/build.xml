@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build" default="FullCompile.dev" basedir="../">
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+
+    <property name="buildDir" value="build"/>
+    <property file="${buildDir}/build.properties" />
+
+    <target name="FullCompile.dev" description="Goes through the whole process for compiling a project"
+        depends="SoyCompiler, DepsWriter, ClosureBuilder.getDependencies, ClosureCompiler.dev, CopyForBuild" />
+
+    <target name="FullCompile.prod" description="Goes through the whole process for compiling a project"
+        depends="SoyCompiler, DepsWriter, ClosureBuilder.getDependencies, ClosureCompiler.prod, CopyForBuild" />
+
+    <target name="FullCompile.exportDev" description="Goes through the whole process for compiling a project"
+        depends="SoyCompiler, DepsWriter, ClosureBuilder.getExportDependencies, ClosureCompiler.exportDev, CopyForBuild" />
+
+    <target name="FullCompile.exportProd" description="Goes through the whole process for compiling a project"
+        depends="SoyCompiler, DepsWriter, ClosureBuilder.getExportDependencies, ClosureCompiler.prod, CopyForBuild" />
+
+    <target name="SoyCompiler" description="Translates soy templates into JavaScript functions">
+        <apply executable="java" failonerror="true" parallel="true">
+            <fileset dir="${soyDir}" includes="${soyFiles}"/>
+
+            <arg line="-jar" />
+            <arg path="${soyJar}" />
+
+            <arg line="${soyCompilerOptions}" />
+
+            <srcfile />
+        </apply>
+    </target>
+
+    <target name="DepsWriter" description="Writes the development deps JS file (also for unit testing)">
+
+        <apply executable="python" description="Run DepsWriter" failonerror="true">
+            <fileset file="${depsWriterPy}" />
+
+            <srcfile />
+            <arg prefix="--root_with_prefix=" value="${root_with_prefix}" />
+            <arg prefix="--output_file=" value="${devDepsFile}" />
+        </apply>
+    </target>
+
+    <target name="ClosureBuilder.getDependencies" description="Assembles a list of the js files required to build the application. These js files will be those goog.require'd from the closure library and your application.">
+
+        <apply executable="python" description="Run ClosureBuilder" failonerror="true">
+            <fileset file="${closureBuilderPy}" />
+
+            <srcfile />
+            <arg prefix="--root=" value="${closureLibDir}" />
+            <arg prefix="--root=" value="${appRootPath}" />
+            <arg prefix="--namespace=" value="${appNamespace}" />
+
+            <arg prefix="--output_mode=" value="${outputMode}" />
+            <arg prefix="--compiler_jar=" value="${closureJar}" />
+            <arg prefix="--output_file=" value="${jsFiles}" />
+
+        </apply>
+
+        <!-- Prevent 'Unknown type' compiler errors by
+        combining the 2 JS dependency files with the above generated list of project JS files -->
+        <loadfile srcfile="${jsFiles}" property="jsDepsTmp">
+            <filterchain>
+                <!-- 1. Prepend the dependency files -->
+                <concatfilter prepend="${jsDepsFiles}" />
+            </filterchain>
+        </loadfile>
+
+
+        <echo file="${jsFiles}" message="${jsDepsTmp}" />
+
+    </target>
+
+    <target name="ClosureBuilder.getTestDependencies" >
+        <antcall target="ClosureBuilder.getDependencies">
+            <param name="appNamespace" value="${appNamespace_test}"/>
+        </antcall>
+    </target>
+
+    <target name="ClosureBuilder.getExportDependencies" >
+        <antcall target="ClosureBuilder.getDependencies">
+            <param name="appNamespace" value="${appNamespace_export}"/>
+        </antcall>
+    </target>
+
+    <target name="ClosureCompiler.dev">
+        <antcall target="ClosureCompiler_">
+            <param name="compileOptions" value="${devCompileOptions}" />
+        </antcall>
+    </target>
+
+    <target name="ClosureCompiler.prod">
+        <antcall target="ClosureCompiler_">
+            <param name="compileOptions" value="${prodCompileOptions}" />
+        </antcall>
+    </target>
+
+    <target name="ClosureCompiler.test">
+        <antcall target="ClosureCompiler_">
+            <param name="compileOptions" value="${devCompileOptions_test}" />
+        </antcall>
+    </target>
+
+    <target name="ClosureCompiler.exportDev">
+        <antcall target="ClosureCompiler_">
+            <param name="compileOptions" value="${exportDevCompileOptions}" />
+        </antcall>
+    </target>
+
+    <target name="ClosureCompiler_">
+
+        <delete verbose="true">
+            <fileset dir="${outputDir}" includes="**/*" />
+        </delete>
+
+        <echo message="Running: loadfile ${jsFiles} (To create --js switches for compiler)" />
+
+        <!-- Gets the list of the application's file dependencies to pass to closure compiler -->
+        <loadfile srcfile="${jsFiles}" property="jsDeps">
+            <filterchain>
+                <striplinebreaks />
+            </filterchain>
+        </loadfile>
+
+        <propertyregex property="jsDepsSwitchesTmp" input="${jsDeps}"
+                regexp="(\.js)([\w\.])"
+                replace="\1 \2"/>
+
+        <property name="jsDepsSwitches" value="--js=${jsDepsSwitchesTmp}" />
+
+        <!-- Forces ${compileOptions} to be printable on a single line -->
+        <propertyregex property="compileOptionsPrint" input="${compileOptions}"
+                       regexp=" "
+                       replace=" " />
+
+        <echo message="Running: java -jar ${closureJar} ${jsDepsSwitches} ${compileOptionsPrint}" />
+
+        <apply executable="java" description="exec closure compiler." verbose="true">
+            <filelist dir="${basedir}" files="${closureJar}"/>
+
+            <arg line="-jar" />
+            <srcfile />
+
+            <arg line="${jsDepsSwitches}" />
+
+            <arg line="${compileOptions}" />
+        </apply>
+    </target>
+
+    <target name="CopyForBuild">
+        <copy overwrite="true" file="${appRootPath}/index-deploy.html" tofile="${outputDir}/index.html" verbose="on" />
+        <copy overwrite="true" todir="${outputDir}/css" verbose="on">
+            <fileset dir="${appRootPath}/css" />
+        </copy>
+        <copy overwrite="true" todir="${outputDir}/img" verbose="on">
+            <fileset dir="${appRootPath}/img" />
+        </copy>
+    </target>
+
+    <target name="JSDocs" description="Generates documentation from JS comments">
+
+        <delete dir="${jsDocOutputDir}" />
+
+        <taskdef name="jsdoctoolkit"
+            classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"
+            classpath="${jsDocAntTaskJar}; ${jsDocRhinoJar}"/>
+
+        <jsdoctoolkit jsdochome="${basedir}/${jsDocHome}/"
+            template="${jsDocTemplate}"
+            outputdir="${jsDocOutputDir}"
+            inputdir="${jsDocInputDir}"
+            includeprivate="${jsDocIncludePrivate}" />
+
+    </target>
+
+</project>

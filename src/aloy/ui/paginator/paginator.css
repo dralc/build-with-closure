@@ -1,0 +1,21 @@
+.aloy-ui-pagi .stats {
+    margin-right: 10px;
+    vertical-align: bottom;
+}
+.aloy-ui-pagi li {
+    border: silver solid 1px;
+    padding: 2px 5px;
+    margin-right:2px;
+    cursor: pointer;
+}
+.aloy-ui-pagi li.active {
+    font-weight: bold;
+    background-color: #ddf8cc;
+    cursor: default !important;
+    border: none;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+.aloy-ui-pagi li.hover {
+    background-color: #E8EEF7;
+}

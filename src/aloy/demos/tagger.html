@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>component demo with logger</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <link href="../../../../closure-library/closure/goog/css/common.css" rel="stylesheet"/>
+
+        <style type="text/css">
+@import '../ui/tagger/tagger.css';
+
+#myContainer>div {
+    margin-right: 5px;
+}
+        </style>
+    </head>
+    <body>
+
+        <fieldset>
+            <legend>Tagger basic</legend>
+            
+            <div id="myContainer"></div>
+            
+            <br/>
+            <button id="dispose">dispose all</button>
+        </fieldset>
+
+        <br/>
+
+        <!-- Logger UI -->
+        <fieldset class="goog-debug-panel">
+            <legend>Event Log</legend>
+            <div id="log"></div>
+        </fieldset>
+
+
+        
+        <script src="../../../../closure-library/closure/goog/base.js"></script>
+        <script src="../../devDeps.js"></script>
+
+        <!-- Instantiate new Taggers  -->
+        <script>
+            goog.require('aloy.ui.Tagger');
+        </script>
+        <script>
+            /**
+             * @constructor
+             */
+            aloy.ui.TaggerDemo = function TaggerDemo() {
+
+                var model = {
+                            tagText : 'Tag one',
+                            buttonText : '&#x2718;',
+                            meta: {
+                                filterId: 'firstFilterId'
+                            }
+                        },
+                        model2 = {
+                            tagText : '01/12/2011 - 23/01/2012',
+                            buttonText : '&rarr; action',
+                            meta: {
+                                filterId: 'secondFilterId'
+                            }
+                        },
+
+                        container = goog.dom.getElement('myContainer');
+
+
+                this.tagger1 = new aloy.ui.Tagger(model, undefined, handleAction);
+                this.tagger1.render(container);
+
+                this.tagger2 = new aloy.ui.Tagger(model2, undefined, handleAction);
+                this.tagger2.render(container);
+
+
+                function handleAction (dat) {
+                    console.dir(dat);
+                }
+
+                var disposeBtn = goog.dom.getElement('dispose');
+                goog.events.listen(disposeBtn, goog.events.EventType.CLICK, function (e) {
+
+                    console.log('dispose tagger1');
+                    this.tagger1.dispose();
+                    console.info('listener count: '+ goog.events.getTotalListenerCount());
+
+                    console.log('dispose tagger2');
+                    this.tagger2.dispose();
+                    console.info('listener count: '+ goog.events.getTotalListenerCount());
+                }, undefined, this);
+            };
+        </script>
+
+
+        <!-- Setup Logger -->
+        <script>
+            goog.require('goog.debug.DivConsole');
+            goog.require('goog.debug.LogManager');
+            goog.require('goog.debug.Logger');
+            goog.require('goog.object');
+            goog.require('goog.ui.Component');
+        </script>
+        <script>
+            goog.debug.LogManager.getRoot().setLevel(goog.debug.Logger.Level.ALL);
+            var logger = goog.debug.Logger.getLogger('demo');
+            var logconsole = new goog.debug.DivConsole(goog.dom.getElement('log'));
+            logconsole.setCapturing(true);
+
+            var componentEvents = goog.object.getValues(goog.ui.Component.EventType);
+            logger.fine('Listening for: ' + componentEvents.join(', ') + '.');
+
+            function logEvent(e) {
+                logger.info('"' + e.target.getCaption() + '" dispatched: ' + e.type);
+            }
+        </script>
+
+
+        <!-- Listen for tagger component events -->
+        <script>
+        var demo = new aloy.ui.TaggerDemo();
+
+        // LOG all standard component componentEvents
+        goog.events.listen(demo.tagger1, componentEvents, logEvent);
+        goog.events.listen(demo.tagger1, aloy.ui.Tagger.EventType.ACTION, logEvent);
+        
+        goog.events.listen(demo.tagger2, componentEvents, logEvent);
+        goog.events.listen(demo.tagger2, aloy.ui.Tagger.EventType.ACTION, logEvent);
+
+        console.info('listener count: '+ goog.events.getTotalListenerCount());
+        </script>
+    </body>
+</html>

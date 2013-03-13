@@ -1,0 +1,56 @@
+
+{namespace aloy.ui.soy.paginator}
+
+/**
+ * @param eId       | A unique id for the root element
+ * @param pages     | An array of numbers representing the page numbers to render
+ * @param clickedPg | The page that's to be selected
+ * @param opt_range | Example '1-10' (Goes together with opt_total)
+ * @param opt_total | The total number of results (Goes together with opt_range)
+ * @param opt_next  | Set to true to show the 'next' button. Depends opt_lastPg
+ * @param opt_maxPg | Required when setting opt_next
+ * @param opt_prev  | Set to true to show the 'prev' button
+ */
+{template .renderHtm autoescape="false"}
+
+<div id="{$eId}" class="{css aloy.ui.Paginator.classes.BASE}">
+
+    {if $opt_range and $opt_total}
+        <div class="goog-inline-block {css aloy.ui.Paginator.classes.STATS}">
+            {$opt_range} of {$opt_total} results
+        </div>
+    {/if}
+
+    <ul class="goog-inline-block">
+        {if $opt_prev and (length($pages) !=0) and ($pages[0] != 1)}
+            <li class="goog-inline-block"
+                data-page="{$clickedPg - 1}">
+                &larr;
+            </li>
+        {/if}
+
+        {foreach $pg in $pages}
+        {if $clickedPg == $pg}
+            <li class="goog-inline-block {css aloy.ui.Paginator.classes.ACTIVE}"
+                data-page="{$pg}">
+                {$pg}
+            </li>
+        {else}
+            <li class="goog-inline-block"
+                data-page="{$pg}">
+                {$pg}
+            </li>
+        {/if}
+        {/foreach}
+
+        {if $opt_next and ($pages[length($pages) - 1] < $opt_maxPg)}
+            <li class="goog-inline-block"
+                data-page="{$clickedPg + 1}">
+                &rarr;
+            </li>
+        {/if}
+    </ul>
+
+</div>
+
+{/template}

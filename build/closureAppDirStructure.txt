@@ -1,0 +1,24 @@
+
+closure-library (Check out http://closure-library.googlecode.com/svn/trunk/ then EXPORT here)
+  > closure
+    > goog
+
+
+Project
+
+  build
+    > bin             (generated output files)
+    > jar             (Jars for Closure and Soy compilers)
+    > jsDepsFiles.txt (A list of dependency files)
+    > jsFiles.txt     (Generated list of JS files in dependency order. It's used for compilation)
+
+
+  src
+    > aloy       (Root folder to put all your application namespaces)
+    > devDeps.js (Generated JS file for loading JS files in uncompiled development mode)
+    > externs.js ()
+    > libs
+      > soy          (the Closure Templates util files)
+      > soyTemplates (contains the soy templates & their compiled versions)
+
+  docs (generated docs)

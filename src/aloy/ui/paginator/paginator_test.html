@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Paginator test</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+
+        <script src="../../../closure-library-exp/closure/goog/base.js"></script>
+        <script src="../deps.js"></script>
+
+        <script>
+            goog.require('goog.testing.jsunit');
+            goog.require('aloy.ui.Paginator');
+        </script>
+
+        <script>
+            function setUp () {
+                pagi = new aloy.ui.Paginator();
+            }
+
+            function tearDown () {
+                pagi = null;
+            }
+
+            function test_generatePages_ () {
+
+                var actu;
+
+                // Legend:
+                // [] == clicked portion
+                // | == set end, a no. after this symbol is the maxPg
+                // _ == currentPg
+
+                // CASE:
+                //  _
+                //  1 | 1
+                actu = pagi.generatePages_(1, 1);
+                assertArrayEquals([], actu);
+
+                // CASE:
+                // _
+                // 2 | 1
+                var err = assertThrows(goog.partial(pagi.generatePages_, 2, 1));
+
+                // CASE:
+                //  _
+                // [1 2 3 4 5 6 7 8 9 10] | 10
+                actu = pagi.generatePages_(1, 10, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                actu = pagi.generatePages_(1, 10, 5);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                actu = pagi.generatePages_(1, 10, 6);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                actu = pagi.generatePages_(1, 10, 10);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                // CASE:
+                //  _
+                // [1 2 3 4 5] 6 7 8 9 10 | 11
+                actu = pagi.generatePages_(1, 11, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+                actu = pagi.generatePages_(1, 11, 5);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                // CASE:
+                //  _
+                //  1 2 3 4 5 [6 7 8 9 10] | 11
+                actu = pagi.generatePages_(1, 11, 6);
+                assertArrayEquals([2,3,4,5,6,7,8,9,10,11], actu);
+                actu = pagi.generatePages_(1, 11, 10);
+                assertArrayEquals([2,3,4,5,6,7,8,9,10,11], actu);
+
+                // CASE:
+                //  _
+                // [1 2 3 4 5] 6 7 8 9 10 | 12
+                actu = pagi.generatePages_(1, 12, 5);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                // CASE:
+                //  _
+                // 1 2 3 4 5 [6 7 8 9 10] | 12
+                actu = pagi.generatePages_(1, 12, 6);
+                assertArrayEquals([2,3,4,5,6,7,8,9,10,11], actu);
+                actu = pagi.generatePages_(1, 12, 8);
+                assertArrayEquals([3,4,5,6,7,8,9,10,11,12], actu);
+
+                // CASE:
+                //  _
+                // [1 2 3 4 5] 6 7 8 9 10 | 15
+                actu = pagi.generatePages_(1, 15, 5);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                // CASE:
+                //  _
+                //  1 2 3 4 5 [6 7 8 9 10] | 15
+                actu = pagi.generatePages_(1, 15, 6);
+                assertArrayEquals([2,3,4,5,6,7,8,9,10,11], actu);
+                actu = pagi.generatePages_(1, 15, 10);
+                assertArrayEquals([6,7,8,9,10,11,12,13,14,15], actu);
+
+                // CASE:
+                //          _
+                // [2 3 4 5 6] 7 8 9 10 11 | 11
+                actu = pagi.generatePages_(6, 11, 5, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+                actu = pagi.generatePages_(6, 11, 3, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+                actu = pagi.generatePages_(6, 11, 2, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+
+                // CASE:
+                //         _
+                // 2 3 4 5 6 [7 8 9 10 11] | 11
+                actu = pagi.generatePages_(6, 11, 7, 2);
+                assertArrayEquals([2,3,4,5,6,7,8,9,10,11], actu);
+                actu = pagi.generatePages_(6, 11, 11, 2);
+                assertArrayEquals([2,3,4,5,6,7,8,9,10,11], actu);
+
+                // CASE:
+                //          _
+                // [2 3 4 5 6] 7 8 9 10 11 | 16
+                actu = pagi.generatePages_(6, 16, 5, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+                actu = pagi.generatePages_(6, 16, 2, 2);
+                assertArrayEquals([1,2,3,4,5,6,7,8,9,10], actu);
+                
+                // CASE:
+                //         _
+                // 2 3 4 5 6 [7 8 9 10 11] | 16
+                actu = pagi.generatePages_(6, 16, 7, 2);
+                assertArrayEquals([3,4,5,6,7,8,9,10,11,12], actu);
+                actu = pagi.generatePages_(6, 16, 9, 2);
+                assertArrayEquals([5,6,7,8,9,10,11,12,13,14], actu);
+                actu = pagi.generatePages_(6, 16, 11, 2);
+                assertArrayEquals([7,8,9,10,11,12,13,14,15,16], actu);
+
+                // CASE:
+                //           _
+                // [7 8 9 10 11] 12 13 14 15 16 | 16
+                actu = pagi.generatePages_(11, 16, 10, 7);
+                assertArrayEquals([6,7,8,9,10,11,12,13,14,15], actu);
+                actu = pagi.generatePages_(11, 16, 7, 7);
+                assertArrayEquals([3,4,5,6,7,8,9,10,11,12], actu);
+
+                // CASE:
+                //          _
+                // 7 8 9 10 11 [12 13 14 15 16] | 16
+                actu = pagi.generatePages_(11, 16, 12, 7);
+                assertArrayEquals([7,8,9,10,11,12,13,14,15,16], actu);
+                actu = pagi.generatePages_(11, 16, 16, 7);
+                assertArrayEquals([7,8,9,10,11,12,13,14,15,16], actu);
+                
+            }
+
+            /**
+             * Tests for alternating the maxPagesInSet param
+             */
+            function test_generatePages_set_maxPagesInSet() {
+                // CASE: maxPagesInSet = 5
+                // _
+                // 1 2 3 [4 5] | 6
+                var actu = pagi.generatePages_(1, 6, 4, 1, 5);
+                assertArrayEquals([2,3,4,5,6], actu);
+
+
+                // CASE: maxPagesInSet = 5
+                //       _
+                // [2 3] 4 5 6 | 6
+                actu = pagi.generatePages_(4, 6, 3, 2, 5);
+                assertArrayEquals([1,2,3,4,5], actu);
+
+            }
+
+            /**
+             * 
+             */
+            function test_reset() {
+                pagi.reset(26, 5, 4);
+
+                assertEquals(26, pagi.totalItems_);
+                assertEquals(5, pagi.itemsPerPage_);
+                assertEquals(4, pagi.maxPagesInSet_);
+
+                var exp_maxPg = Math.ceil(26/5);
+                assertEquals(exp_maxPg, pagi.maxPg_);
+
+            }
+        </script>
+        
+    </body>
+</html>
